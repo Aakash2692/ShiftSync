@@ -1,0 +1,78 @@
+/* Dashboard.css */
+
+/* Add this style for dashboard container */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Add this style for hamburger menu */
+.hamburger-menu {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+/* Add this style for timesheet container */
+.timesheet-container {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-top: 20px;
+  max-width: 800px;
+  background-color: #f9f9f9;
+}
+
+/* Add this style for table */
+.timesheet-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Add this style for table header */
+.timesheet-table th {
+  background-color: #007bff;
+  color: white;
+  padding: 10px;
+}
+
+/* Add this style for table rows */
+.timesheet-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Add this style for table data */
+.timesheet-table td {
+  padding: 10px;
+}
+
+/* Add this style for input fields */
+.timesheet-container input[type="date"],
+.timesheet-container input[type="text"],
+.timesheet-container select {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Add this style for buttons */
+.button-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.button-container button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-container button:hover {
+  background-color: #0056b3;
+}

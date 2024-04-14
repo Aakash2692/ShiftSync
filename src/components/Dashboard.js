@@ -1,21 +1,18 @@
-// Dashboard.js
-
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import '../components/css/Dashboard.css';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "../components/css/Dashboard.css";
 
 const Dashboard = ({ user }) => {
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const [timesheetTemplate, setTimesheetTemplate] = useState(null);
 
   useEffect(() => {
-    // Fetch user details
     const fetchData = async () => {
       try {
-        const userResponse = await axios.get(`/api/user/${user.id}`); // Assuming endpoint for fetching user details
+        const userResponse = await axios.get(`/api/user/${user.id}`);
         setUserName(userResponse.data.name);
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error("Error fetching user data:", error);
       }
     };
 
@@ -23,7 +20,6 @@ const Dashboard = ({ user }) => {
   }, [user.id]);
 
   useEffect(() => {
-    // Generate timesheet template
     const generateTimesheetTemplate = () => {
       const template = (
         <div className="timesheet-container">
@@ -44,14 +40,22 @@ const Dashboard = ({ user }) => {
                 </tr>
               </thead>
               <tbody>
-                {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day, index) => (
+                {[
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                ].map((day, index) => (
                   <tr key={index}>
                     <td>{day}</td>
                     <td>
                       <select
                         name={`startTime_${day}`}
                         onChange={(e) => handleTimeChange(e, day)}
-                        disabled={day === 'Sunday'}
+                        disabled={day === "Sunday"}
                       >
                         {renderTimeOptions()}
                       </select>
@@ -60,7 +64,7 @@ const Dashboard = ({ user }) => {
                       <select
                         name={`endTime_${day}`}
                         onChange={(e) => handleTimeChange(e, day)}
-                        disabled={day === 'Sunday'}
+                        disabled={day === "Sunday"}
                       >
                         {renderTimeOptions()}
                       </select>
@@ -70,7 +74,7 @@ const Dashboard = ({ user }) => {
                         type="text"
                         name={`workHours_${day}`}
                         readOnly
-                        value={day === 'Sunday' ? '0' : ''}
+                        value={day === "Sunday" ? "0" : ""}
                       />
                     </td>
                     <td>Pending</td>
@@ -79,7 +83,7 @@ const Dashboard = ({ user }) => {
               </tbody>
             </table>
             <div className="button-container">
-              {user.role === 'manager' && (
+              {user.role === "manager" && (
                 <button type="submit">Submit Timesheet</button>
               )}
             </div>
@@ -96,21 +100,31 @@ const Dashboard = ({ user }) => {
     const startTimeName = `startTime_${day}`;
     const endTimeName = `endTime_${day}`;
     const workHoursName = `workHours_${day}`;
-    const startTime = document.querySelector(`select[name="${startTimeName}"]`).value;
-    const endTime = document.querySelector(`select[name="${endTimeName}"]`).value;
+    const startTime = document.querySelector(
+      `select[name="${startTimeName}"]`
+    ).value;
+    const endTime = document.querySelector(
+      `select[name="${endTimeName}"]`
+    ).value;
     const [startHour, startMinute, startPeriod] = startTime.split(/:| /);
     const [endHour, endMinute, endPeriod] = endTime.split(/:| /);
-    let start = parseInt(startHour, 10) + (startPeriod === 'PM' && startHour !== '12' ? 12 : 0) + parseInt(startMinute, 10) / 60;
-    let end = parseInt(endHour, 10) + (endPeriod === 'PM' && endHour !== '12' ? 12 : 0) + parseInt(endMinute, 10) / 60;
+    let start =
+      parseInt(startHour, 10) +
+      (startPeriod === "PM" && startHour !== "12" ? 12 : 0) +
+      parseInt(startMinute, 10) / 60;
+    let end =
+      parseInt(endHour, 10) +
+      (endPeriod === "PM" && endHour !== "12" ? 12 : 0) +
+      parseInt(endMinute, 10) / 60;
     let hours = end - start;
     if (hours < 0) hours += 24;
-    document.querySelector(`input[name="${workHoursName}"]`).value = hours.toFixed(2);
+    document.querySelector(`input[name="${workHoursName}"]`).value =
+      hours.toFixed(2);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Submit timesheet logic
-    alert('Timesheet submitted');
+    alert("Timesheet submitted");
   };
 
   const renderTimeOptions = () => {
@@ -128,27 +142,51 @@ const Dashboard = ({ user }) => {
     return options;
   };
 
+  const handleLogout = () => {
+    // Clear user session and redirect to login page
+    sessionStorage.clear(); // Clears all data stored in sessionStorage
+    window.location.href = "/login"; // Redirects to the login page
+  };
+  
+
   return (
     <div className="dashboard-container">
+      <div className="logout-button">
+        <button onClick={handleLogout}>Logout</button>
+      </div>
       <div className="hamburger-menu">
-        {user.role === 'manager' && (
+        {user.role === "manager" && (
           <>
-            <button onClick={() => { /* Implement View Past Timesheets functionality */ }}>
+            <button
+              onClick={() => {
+                /* Implement View Past Timesheets functionality */
+              }}
+            >
               View Past Timesheets
             </button>
-            <button onClick={() => { /* Implement Validate Timesheets functionality */ }}>
+            <button
+              onClick={() => {
+                /* Implement Validate Timesheets functionality */
+              }}
+            >
               Validate Timesheets
             </button>
           </>
         )}
-        {user.role === 'employee' && (
-          <button onClick={() => { /* Implement View Past Timesheets functionality */ }}>
+        {user.role === "employee" && (
+          <button
+            onClick={() => {
+              /* Implement View Past Timesheets functionality */
+            }}
+          >
             View Past Timesheets
           </button>
         )}
       </div>
       <h2>Dashboard</h2>
-      <h3>Welcome, {userName} ({user.role})</h3>
+      <h3>
+        Welcome, {userName} ({user.role})
+      </h3>
       {timesheetTemplate}
     </div>
   );

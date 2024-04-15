@@ -7,6 +7,8 @@ const Dashboard = ({ user }) => {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [timesheetTemplate, setTimesheetTemplate] = useState(null);
+  const [maxDate, setMaxDate] = useState(""); // Max date allowed (current week)
+  const [minDate, setMinDate] = useState(""); // Min date allowed (4 weeks back)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,6 +36,9 @@ const Dashboard = ({ user }) => {
     setFromDate(mondayFormatted);
     // Calculate toDate accordingly
     setToDate(calculateToDate(mondayFormatted));
+    // Set max and min dates for arrow button disabling
+    setMaxDate(mondayFormatted);
+    setMinDate(calculateMinDate(mondayFormatted));
   }, []);
 
   useEffect(() => {
@@ -44,9 +49,9 @@ const Dashboard = ({ user }) => {
           <form onSubmit={handleSubmit}>
             <label>From Date:</label>
             <div className="date-input">
-              <input type="date" value={fromDate} onChange={handleFromDateChange} />
-              <button onClick={handlePrevWeek}>&lt;</button>
-              <button onClick={handleNextWeek}>&gt;</button>
+              <input type="date" value={fromDate} onChange={handleFromDateChange} min={minDate} max={maxDate} />
+              <button onClick={handlePrevWeek} disabled={fromDate === minDate}>&lt;</button>
+              <button onClick={handleNextWeek} disabled={fromDate === maxDate}>&gt;</button>
             </div>
             <label>To Date:</label>
             <input type="date" value={toDate} disabled />
@@ -113,7 +118,7 @@ const Dashboard = ({ user }) => {
     };
 
     generateTimesheetTemplate();
-  }, [fromDate]);
+  }, [fromDate, minDate, maxDate]);
 
   const handleFromDateChange = (e) => {
     setFromDate(e.target.value);
@@ -144,6 +149,11 @@ const Dashboard = ({ user }) => {
     return toDate.toISOString().split('T')[0];
   };
 
+  const calculateMinDate = (fromDate) => {
+    const minDate = new Date(new Date(fromDate).getTime() - 28 * 24 * 60 * 60 * 1000); // 4 weeks back
+    return minDate.toISOString().split('T')[0];
+  };
+
   const handleTimeChange = (e, day) => {
     const startTimeName = `startTime_${day}`;
     const endTimeName = `endTime_${day}`;
@@ -167,22 +177,19 @@ const Dashboard = ({ user }) => {
       alert("Timesheet submitted");
     }
   };
-  
 
-const renderTimeOptions = () => {
-  const options = [];
-  // Start loop from 9 AM (09:00) and end at 6 PM (18:00)
-  for (let i = 9; i <= 18; i++) {
-    // Add options for each hour
-    options.push(
-      <option key={`${i}:00`} value={`${i}:00`}>{`${i}:00`}</option>,
-      <option key={`${i}:30`} value={`${i}:30`}>{`${i}:30`}</option>
-    );
-  }
-  return options;
-};
-
-  
+  const renderTimeOptions = () => {
+    const options = [];
+    // Start loop from 9 AM (09:00) and end at 6 PM (18:00)
+    for (let i = 9; i <= 18; i++) {
+      // Add options for each hour
+      options.push(
+        <option key={`${i}:00`} value={`${i}:00`}>{`${i}:00`}</option>,
+        <option key={`${i}:30`} value={`${i}:30`}>{`${i}:30`}</option>
+      );
+    }
+    return options;
+  };
 
   const handleLogout = () => {
     // Clear user session and redirect to login page

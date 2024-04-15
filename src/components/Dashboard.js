@@ -83,9 +83,7 @@ const Dashboard = ({ user }) => {
               </tbody>
             </table>
             <div className="button-container">
-              {user.role === "manager" && (
-                <button type="submit">Submit Timesheet</button>
-              )}
+              <button type="submit">Submit Timesheet</button>
             </div>
           </form>
         </div>
@@ -94,7 +92,7 @@ const Dashboard = ({ user }) => {
     };
 
     generateTimesheetTemplate();
-  }, [user.role]);
+  }, []);
 
   const handleTimeChange = (e, day) => {
     const startTimeName = `startTime_${day}`;
@@ -147,41 +145,28 @@ const Dashboard = ({ user }) => {
     sessionStorage.clear(); // Clears all data stored in sessionStorage
     window.location.href = "/login"; // Redirects to the login page
   };
-  
+
+  const handleViewPastTimesheets = () => {
+    // Implement View Past Timesheets functionality
+  };
+
+  const handleValidateTimesheets = () => {
+    // Implement Validate Timesheets functionality
+  };
 
   return (
     <div className="dashboard-container">
-      <div className="logout-button">
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-      <div className="hamburger-menu">
+      <div className="navbar">
         {user.role === "manager" && (
           <>
-            <button
-              onClick={() => {
-                /* Implement View Past Timesheets functionality */
-              }}
-            >
-              View Past Timesheets
-            </button>
-            <button
-              onClick={() => {
-                /* Implement Validate Timesheets functionality */
-              }}
-            >
-              Validate Timesheets
-            </button>
+            <button onClick={handleViewPastTimesheets}>View Past Timesheets</button>
+            <button onClick={handleValidateTimesheets}>Validate Timesheets</button>
           </>
         )}
         {user.role === "employee" && (
-          <button
-            onClick={() => {
-              /* Implement View Past Timesheets functionality */
-            }}
-          >
-            View Past Timesheets
-          </button>
+          <button onClick={handleViewPastTimesheets}>View Past Timesheets</button>
         )}
+        <button onClick={handleLogout}>Logout</button>
       </div>
       <h2>Dashboard</h2>
       <h3>

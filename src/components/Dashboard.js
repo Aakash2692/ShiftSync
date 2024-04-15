@@ -160,29 +160,28 @@ const Dashboard = ({ user }) => {
   };
 
   const handleSubmit = (e) => {
-    // Check if the submit event was triggered by clicking the arrows
-    if (e.nativeEvent.submitter && e.nativeEvent.submitter.tagName === "BUTTON") {
-      // If so, return without showing the alert
-      return;
+    // Check if the submit event was triggered by clicking the submit button
+    if (e.nativeEvent.submitter && e.nativeEvent.submitter.tagName === "BUTTON" && e.nativeEvent.submitter.type === "submit") {
+      // Show the alert only when the submit button is clicked
+      e.preventDefault(); // Prevent the form from submitting
+      alert("Timesheet submitted");
     }
-    // Otherwise, proceed with submitting the timesheet
-    e.preventDefault();
-    alert("Timesheet submitted");
-  };
-
-  const renderTimeOptions = () => {
-    const options = [];
-    // Start loop from 9 AM (09:00) and end at 6 PM (18:00)
-    for (let i = 9; i <= 18; i++) {
-      // Add options for each hour
-      options.push(
-        <option key={`${i}:00`} value={`${i}:00`}>{`${i}:00`}</option>,
-        <option key={`${i}:30`} value={`${i}:30`}>{`${i}:30`}</option>
-      );
-    }
-    return options;
   };
   
+
+const renderTimeOptions = () => {
+  const options = [];
+  // Start loop from 9 AM (09:00) and end at 6 PM (18:00)
+  for (let i = 9; i <= 18; i++) {
+    // Add options for each hour
+    options.push(
+      <option key={`${i}:00`} value={`${i}:00`}>{`${i}:00`}</option>,
+      <option key={`${i}:30`} value={`${i}:30`}>{`${i}:30`}</option>
+    );
+  }
+  return options;
+};
+
   
 
   const handleLogout = () => {

@@ -4,6 +4,8 @@ import "../components/css/Dashboard.css";
 
 const Dashboard = ({ user }) => {
   const [userName, setUserName] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
   const [timesheetTemplate, setTimesheetTemplate] = useState(null);
 
   useEffect(() => {
@@ -20,15 +22,34 @@ const Dashboard = ({ user }) => {
   }, [user.id]);
 
   useEffect(() => {
+    // Get today's date
+    const today = new Date();
+    // Calculate the difference between today and the previous Monday
+    const diff = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
+    // Create a new Date object for the previous Monday
+    const monday = new Date(today.setDate(diff));
+    // Format the date as "YYYY-MM-DD"
+    const mondayFormatted = monday.toISOString().split('T')[0];
+    // Set fromDate to the previous Monday
+    setFromDate(mondayFormatted);
+    // Calculate toDate accordingly
+    setToDate(calculateToDate(mondayFormatted));
+  }, []);
+
+  useEffect(() => {
     const generateTimesheetTemplate = () => {
       const template = (
         <div className="timesheet-container">
           <h3>Timesheet Template</h3>
           <form onSubmit={handleSubmit}>
             <label>From Date:</label>
-            <input type="date" name="fromDate" />
+            <div className="date-input">
+              <input type="date" value={fromDate} onChange={handleFromDateChange} />
+              <button onClick={handlePrevWeek}>&lt;</button>
+              <button onClick={handleNextWeek}>&gt;</button>
+            </div>
             <label>To Date:</label>
-            <input type="date" name="toDate" />
+            <input type="date" value={toDate} disabled />
             <table className="timesheet-table">
               <thead>
                 <tr>
@@ -92,53 +113,77 @@ const Dashboard = ({ user }) => {
     };
 
     generateTimesheetTemplate();
-  }, []);
+  }, [fromDate]);
+
+  const handleFromDateChange = (e) => {
+    setFromDate(e.target.value);
+    setToDate(calculateToDate(e.target.value));
+  };
+
+  const handlePrevWeek = (e) => {
+    e.preventDefault(); // Prevent default behavior
+    const prevWeek = new Date(new Date(fromDate).getTime() - 7 * 24 * 60 * 60 * 1000);
+    const prevWeekDate = prevWeek.toISOString().split('T')[0];
+    setFromDate(prevWeekDate);
+    setToDate(calculateToDate(prevWeekDate));
+  };
+
+  const handleNextWeek = (e) => {
+    e.preventDefault(); // Prevent default behavior
+    const today = new Date().toISOString().split('T')[0];
+    if (fromDate !== today) {
+      const nextWeek = new Date(new Date(fromDate).getTime() + 7 * 24 * 60 * 60 * 1000);
+      const nextWeekDate = nextWeek.toISOString().split('T')[0];
+      setFromDate(nextWeekDate);
+      setToDate(calculateToDate(nextWeekDate));
+    }
+  };
+
+  const calculateToDate = (fromDate) => {
+    const toDate = new Date(new Date(fromDate).getTime() + 6 * 24 * 60 * 60 * 1000);
+    return toDate.toISOString().split('T')[0];
+  };
 
   const handleTimeChange = (e, day) => {
     const startTimeName = `startTime_${day}`;
     const endTimeName = `endTime_${day}`;
     const workHoursName = `workHours_${day}`;
-    const startTime = document.querySelector(
-      `select[name="${startTimeName}"]`
-    ).value;
-    const endTime = document.querySelector(
-      `select[name="${endTimeName}"]`
-    ).value;
+    const startTime = document.querySelector(`select[name="${startTimeName}"]`).value;
+    const endTime = document.querySelector(`select[name="${endTimeName}"]`).value;
     const [startHour, startMinute, startPeriod] = startTime.split(/:| /);
     const [endHour, endMinute, endPeriod] = endTime.split(/:| /);
-    let start =
-      parseInt(startHour, 10) +
-      (startPeriod === "PM" && startHour !== "12" ? 12 : 0) +
-      parseInt(startMinute, 10) / 60;
-    let end =
-      parseInt(endHour, 10) +
-      (endPeriod === "PM" && endHour !== "12" ? 12 : 0) +
-      parseInt(endMinute, 10) / 60;
+    let start = parseInt(startHour, 10) + (startPeriod === "PM" && startHour !== "12" ? 12 : 0) + parseInt(startMinute, 10) / 60;
+    let end = parseInt(endHour, 10) + (endPeriod === "PM" && endHour !== "12" ? 12 : 0) + parseInt(endMinute, 10) / 60;
     let hours = end - start;
     if (hours < 0) hours += 24;
-    document.querySelector(`input[name="${workHoursName}"]`).value =
-      hours.toFixed(2);
+    document.querySelector(`input[name="${workHoursName}"]`).value = hours.toFixed(2);
   };
 
   const handleSubmit = (e) => {
+    // Check if the submit event was triggered by clicking the arrows
+    if (e.nativeEvent.submitter && e.nativeEvent.submitter.tagName === "BUTTON") {
+      // If so, return without showing the alert
+      return;
+    }
+    // Otherwise, proceed with submitting the timesheet
     e.preventDefault();
     alert("Timesheet submitted");
   };
 
   const renderTimeOptions = () => {
     const options = [];
-    for (let i = 1; i <= 12; i++) {
+    // Start loop from 9 AM (09:00) and end at 6 PM (18:00)
+    for (let i = 9; i <= 18; i++) {
+      // Add options for each hour
       options.push(
-        <option key={`${i}:00 AM`} value={`${i}:00 AM`}>{`${i}:00 AM`}</option>,
-        <option key={`${i}:00 PM`} value={`${i}:00 PM`}>{`${i}:00 PM`}</option>
-      );
-      options.push(
-        <option key={`${i}:30 AM`} value={`${i}:30 AM`}>{`${i}:30 AM`}</option>,
-        <option key={`${i}:30 PM`} value={`${i}:30 PM`}>{`${i}:30 PM`}</option>
+        <option key={`${i}:00`} value={`${i}:00`}>{`${i}:00`}</option>,
+        <option key={`${i}:30`} value={`${i}:30`}>{`${i}:30`}</option>
       );
     }
     return options;
   };
+  
+  
 
   const handleLogout = () => {
     // Clear user session and redirect to login page

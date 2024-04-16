@@ -46,10 +46,22 @@ const Dashboard = ({ user }) => {
       const template = (
         <div className="timesheet-container">
           <h3>Timesheet Template</h3>
+          {/* Add Employee Name and Project Details */}
+          <div className="employee-details">
+            <label>Employee Name:</label>
+            <span>{userName}</span><br></br>
+            {/* Add Current Project Details if available */}
+            {/* Replace 'currentProjectDetails' with the actual data */}
+            {/* <label>Current Project:</label>
+            <span>{currentProjectDetails}</span> */}
+            {/* Add Status */}
+            <label>Status:</label>
+            <span>Pending</span>
+          </div>
           <form onSubmit={handleSubmit}>
             <label>From Date:</label>
             <div className="date-input">
-              <input type="date" value={fromDate} onChange={handleFromDateChange} min={minDate} max={maxDate} />
+              <input type="date" value={fromDate} onChange={handleFromDateChange} min={minDate} max={maxDate} readOnly/>
               <button onClick={handlePrevWeek} disabled={fromDate === minDate}>&lt;</button>
               <button onClick={handleNextWeek} disabled={fromDate === maxDate}>&gt;</button>
             </div>
@@ -62,7 +74,6 @@ const Dashboard = ({ user }) => {
                   <th>Start Time</th>
                   <th>End Time</th>
                   <th>Work Hours</th>
-                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -103,7 +114,6 @@ const Dashboard = ({ user }) => {
                         value={day === "Sunday" ? "0" : ""}
                       />
                     </td>
-                    <td>Pending</td>
                   </tr>
                 ))}
               </tbody>
@@ -116,6 +126,8 @@ const Dashboard = ({ user }) => {
       );
       setTimesheetTemplate(template);
     };
+    
+    
 
     generateTimesheetTemplate();
   }, [fromDate, minDate, maxDate]);

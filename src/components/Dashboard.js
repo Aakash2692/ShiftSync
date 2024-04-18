@@ -17,8 +17,8 @@ const Dashboard = ({ user }) => {
         setUserName(userResponse.data.name);
       } catch (error) {
         console.error("Error fetching user data:", error);
-      }
-    };
+      } 
+    };  
 
     fetchData();
   }, [user.id]);

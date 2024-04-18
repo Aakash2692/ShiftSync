@@ -87,3 +87,15 @@
 .timesheet-container button:hover {
   background-color: #0056b3 !important;
 }
+
+/* Add this style for date input container */
+.date-input {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+/* Add this style for date input buttons */
+.date-input button {
+  margin: 0 5px;
+}

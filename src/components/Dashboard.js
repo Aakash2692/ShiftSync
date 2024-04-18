@@ -1,42 +1,30 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../components/css/Dashboard.css";
 
 const Dashboard = ({ user }) => {
+  const navigate = useNavigate();
   const [userName, setUserName] = useState("");
+  const [project, setProject] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [timesheetTemplate, setTimesheetTemplate] = useState(null);
-  const [maxDate, setMaxDate] = useState(""); // Max date allowed (current week)
-  const [minDate, setMinDate] = useState(""); // Min date allowed (4 weeks back)
+  const [maxDate, setMaxDate] = useState("");
+  const [minDate, setMinDate] = useState("");
+
+
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userResponse = await axios.get(`/api/user/${user.id}`);
-        setUserName(userResponse.data.name);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchData();
-  }, [user.id]);
-
-  useEffect(() => {
-    // Get today's date
+    // Mock user data
+    setUserName("John Doe");
+    setProject("Project X");
+    // Mock dates
     const today = new Date();
-    // Calculate the difference between today and the previous Monday
     const diff = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
-    // Create a new Date object for the previous Monday
     const monday = new Date(today.setDate(diff));
-    // Format the date as "YYYY-MM-DD"
-    const mondayFormatted = monday.toISOString().split('T')[0];
-    // Set fromDate to the previous Monday
+    const mondayFormatted = monday.toISOString().split("T")[0];
     setFromDate(mondayFormatted);
-    // Calculate toDate accordingly
     setToDate(calculateToDate(mondayFormatted));
-    // Set max and min dates for arrow button disabling
     setMaxDate(mondayFormatted);
     setMinDate(calculateMinDate(mondayFormatted));
   }, []);
@@ -45,7 +33,6 @@ const Dashboard = ({ user }) => {
     const generateTimesheetTemplate = () => {
       const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle form submission logic here
         alert("Timesheet submitted");
       };
     
@@ -56,6 +43,9 @@ const Dashboard = ({ user }) => {
           <div className="employee-details">
             <label>Employee Name:</label>
             <span>{userName}</span><br></br>
+            {/* Add Project */}
+            <label>Project:</label>
+            <span>{project}</span><br></br>
             {/* Add Status */}
             <label>Status:</label>
             <span>Pending</span>
@@ -130,9 +120,9 @@ const Dashboard = ({ user }) => {
       );
       setTimesheetTemplate(template);
     };
-    
+
     generateTimesheetTemplate();
-  }, [fromDate, minDate, maxDate]);
+  }, [fromDate, minDate, maxDate, userName, project]);
 
   const handleFromDateChange = (e) => {
     setFromDate(e.target.value);
@@ -140,7 +130,7 @@ const Dashboard = ({ user }) => {
   };
 
   const handlePrevWeek = (e) => {
-    e.preventDefault(); // Prevent default behavior
+    e.preventDefault(); 
     const prevWeek = new Date(new Date(fromDate).getTime() - 7 * 24 * 60 * 60 * 1000);
     const prevWeekDate = prevWeek.toISOString().split('T')[0];
     setFromDate(prevWeekDate);
@@ -148,7 +138,7 @@ const Dashboard = ({ user }) => {
   };
 
   const handleNextWeek = (e) => {
-    e.preventDefault(); // Prevent default behavior
+    e.preventDefault(); 
     const today = new Date().toISOString().split('T')[0];
     if (fromDate !== today) {
       const nextWeek = new Date(new Date(fromDate).getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -184,19 +174,15 @@ const Dashboard = ({ user }) => {
   };
 
   const handleSubmit = (e) => {
-    // Check if the submit event was triggered by clicking the submit button
     if (e.nativeEvent.submitter && e.nativeEvent.submitter.tagName === "BUTTON" && e.nativeEvent.submitter.type === "submit") {
-      // Show the alert only when the submit button is clicked
-      e.preventDefault(); // Prevent the form from submitting
+      e.preventDefault(); 
       alert("Timesheet submitted");
     }
   };
 
   const renderTimeOptions = () => {
     const options = [];
-    // Start loop from 9 AM (09:00) and end at 6 PM (18:00)
     for (let i = 9; i <= 18; i++) {
-      // Add options for each hour
       options.push(
         <option key={`${i}:00`} value={`${i}:00`}>{`${i}:00`}</option>,
         <option key={`${i}:30`} value={`${i}:30`}>{`${i}:30`}</option>
@@ -206,13 +192,13 @@ const Dashboard = ({ user }) => {
   };
 
   const handleLogout = () => {
-    // Clear user session and redirect to login page
-    sessionStorage.clear(); // Clears all data stored in sessionStorage
-    window.location.href = "/login"; // Redirects to the login page
+    sessionStorage.clear(); 
+    window.location.href = "/"; 
   };
+  
 
   const handleViewPastTimesheets = () => {
-    // Implement View Past Timesheets functionality
+    navigate("/past-timesheets");
   };
 
   const handleValidateTimesheets = () => {

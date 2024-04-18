@@ -43,92 +43,94 @@ const Dashboard = ({ user }) => {
 
   useEffect(() => {
     const generateTimesheetTemplate = () => {
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        // Handle form submission logic here
+        alert("Timesheet submitted");
+      };
+    
       const template = (
-        <div className="timesheet-container">
+        <form className="timesheet-container" onSubmit={handleSubmit}>
           <h3>Timesheet Template</h3>
           {/* Add Employee Name and Project Details */}
           <div className="employee-details">
             <label>Employee Name:</label>
             <span>{userName}</span><br></br>
-            {/* Add Current Project Details if available */}
-            {/* Replace 'currentProjectDetails' with the actual data */}
-            {/* <label>Current Project:</label>
-            <span>{currentProjectDetails}</span> */}
             {/* Add Status */}
             <label>Status:</label>
             <span>Pending</span>
           </div>
-          <form onSubmit={handleSubmit}>
-            <label>From Date:</label>
-            <div className="date-input">
-              <input type="date" value={fromDate} onChange={handleFromDateChange} min={minDate} max={maxDate} readOnly/>
-              <button onClick={handlePrevWeek} disabled={fromDate === minDate}>&lt;</button>
-              <button onClick={handleNextWeek} disabled={fromDate === maxDate}>&gt;</button>
-            </div>
-            <label>To Date:</label>
-            <input type="date" value={toDate} disabled />
-            <table className="timesheet-table">
-              <thead>
-                <tr>
-                  <th>Day</th>
-                  <th>Start Time</th>
-                  <th>End Time</th>
-                  <th>Work Hours</th>
+          {/* From Date */}
+          <label>From Date:</label>
+          <div className="date-input">
+            <button onClick={handlePrevWeek} disabled={fromDate === minDate}>&lt;</button>
+            <input type="date" value={fromDate} onChange={handleFromDateChange} min={minDate} max={maxDate} readOnly/>
+            <button onClick={handleNextWeek} disabled={fromDate === maxDate}>&gt;</button>
+          </div>
+          {/* To Date */}
+          <label>To Date:</label>
+          <input type="date" value={toDate} disabled />
+          {/* Timesheet Table */}
+          <table className="timesheet-table">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Work Hours</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+              ].map((day, index) => (
+                <tr key={index}>
+                  <td>{day}</td>
+                  <td>
+                    <select
+                      name={`startTime_${day}`}
+                      onChange={(e) => handleTimeChange(e, day)}
+                      disabled={day === "Sunday"}
+                    >
+                      {renderTimeOptions()}
+                    </select>
+                  </td>
+                  <td>
+                    <select
+                      name={`endTime_${day}`}
+                      onChange={(e) => handleTimeChange(e, day)}
+                      disabled={day === "Sunday"}
+                    >
+                      {renderTimeOptions()}
+                    </select>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      name={`workHours_${day}`}
+                      readOnly
+                      value={day === "Sunday" ? "0" : ""}
+                    />
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {[
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ].map((day, index) => (
-                  <tr key={index}>
-                    <td>{day}</td>
-                    <td>
-                      <select
-                        name={`startTime_${day}`}
-                        onChange={(e) => handleTimeChange(e, day)}
-                        disabled={day === "Sunday"}
-                      >
-                        {renderTimeOptions()}
-                      </select>
-                    </td>
-                    <td>
-                      <select
-                        name={`endTime_${day}`}
-                        onChange={(e) => handleTimeChange(e, day)}
-                        disabled={day === "Sunday"}
-                      >
-                        {renderTimeOptions()}
-                      </select>
-                    </td>
-                    <td>
-                      <input
-                        type="text"
-                        name={`workHours_${day}`}
-                        readOnly
-                        value={day === "Sunday" ? "0" : ""}
-                      />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div className="button-container">
-              <button type="submit">Submit Timesheet</button>
-            </div>
-          </form>
-        </div>
+              ))}
+            </tbody>
+          </table>
+          {/* Submit Button */}
+          <div className="button-container">
+            <button type="submit">Submit Timesheet</button>
+          </div>
+        </form>
       );
       setTimesheetTemplate(template);
     };
     
-    
-
     generateTimesheetTemplate();
   }, [fromDate, minDate, maxDate]);
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import PastTimesheetsPage from './components/PastTimesheetsPage';
+import ValidateTimesheetsPage from './components/ValidateTimesheetsPage'; // Import the ValidateTimesheetsPage component
 import './App.css';
 
 const App = () => {
@@ -16,7 +16,7 @@ const App = () => {
           <h2>An Employee Time-Entry Management System</h2>
           <Routes>
             <Route path="/" element={!user ? <Login setUser={setUser} /> : <Dashboard user={user} />} />
-            <Route path="/past-timesheets" element={<PastTimesheetsPage />} />
+            <Route path="/validate-timesheets" element={<ValidateTimesheetsPage />} /> {/* Add route for ValidateTimesheetsPage */}
           </Routes>
         </div>
       </div>

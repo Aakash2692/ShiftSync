@@ -1,0 +1,83 @@
+/* Add this to your PastTimesheetsPage.css file */
+.timesheets-container {
+    margin: 20px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    text-align: left;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  tr:hover {
+    background-color: #ddd;
+  }
+  
+  td {
+    text-align: left;
+  }
+  
+  h2 {
+    color: #333;
+  }
+  
+  .button-container {
+    margin-top: 20px;
+  }
+  
+  button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-right: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  button:hover {
+    background-color: #45a049;
+  }
+  
+  .go-back-button {
+    background-color: #f44336; /* Red */
+  }
+  
+  .go-back-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  .approve-button {
+    background-color: #4CAF50; /* Green */
+  }
+  
+  .approve-button:hover {
+    background-color: #45a049;
+  }
+  
+  .reject-button {
+    background-color: #f44336; /* Red */
+  }
+  
+  .reject-button:hover {
+    background-color: #d32f2f;
+  }
+  

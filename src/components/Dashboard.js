@@ -12,8 +12,6 @@ const Dashboard = ({ user }) => {
   const [maxDate, setMaxDate] = useState("");
   const [minDate, setMinDate] = useState("");
 
-
-
   useEffect(() => {
     // Mock user data
     setUserName("John Doe");
@@ -35,7 +33,7 @@ const Dashboard = ({ user }) => {
         e.preventDefault();
         alert("Timesheet submitted");
       };
-    
+
       const template = (
         <form className="timesheet-container" onSubmit={handleSubmit}>
           <h3>Timesheet Template</h3>
@@ -130,7 +128,7 @@ const Dashboard = ({ user }) => {
   };
 
   const handlePrevWeek = (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     const prevWeek = new Date(new Date(fromDate).getTime() - 7 * 24 * 60 * 60 * 1000);
     const prevWeekDate = prevWeek.toISOString().split('T')[0];
     setFromDate(prevWeekDate);
@@ -138,7 +136,7 @@ const Dashboard = ({ user }) => {
   };
 
   const handleNextWeek = (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
     const today = new Date().toISOString().split('T')[0];
     if (fromDate !== today) {
       const nextWeek = new Date(new Date(fromDate).getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -175,7 +173,7 @@ const Dashboard = ({ user }) => {
 
   const handleSubmit = (e) => {
     if (e.nativeEvent.submitter && e.nativeEvent.submitter.tagName === "BUTTON" && e.nativeEvent.submitter.type === "submit") {
-      e.preventDefault(); 
+      e.preventDefault();
       alert("Timesheet submitted");
     }
   };
@@ -192,30 +190,20 @@ const Dashboard = ({ user }) => {
   };
 
   const handleLogout = () => {
-    sessionStorage.clear(); 
-    window.location.href = "/"; 
+    sessionStorage.clear();
+    window.location.href = "/";
   };
-  
 
-  const handleViewPastTimesheets = () => {
-    navigate("/past-timesheets");
-  };
 
   const handleValidateTimesheets = () => {
-    // Implement Validate Timesheets functionality
+    navigate("/validate-timesheets");
   };
 
   return (
     <div className="dashboard-container">
       <div className="navbar">
         {user.role === "manager" && (
-          <>
-            <button onClick={handleViewPastTimesheets}>View Past Timesheets</button>
-            <button onClick={handleValidateTimesheets}>Validate Timesheets</button>
-          </>
-        )}
-        {user.role === "employee" && (
-          <button onClick={handleViewPastTimesheets}>View Past Timesheets</button>
+          <button onClick={handleValidateTimesheets}>Validate Timesheets</button>
         )}
         <button onClick={handleLogout}>Logout</button>
       </div>

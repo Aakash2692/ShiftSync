@@ -13,9 +13,15 @@ const Dashboard = ({ user }) => {
   const [minDate, setMinDate] = useState("");
 
   useEffect(() => {
-    // Mock user data
-    setUserName("John Doe");
-    setProject("Project X");
+    // Mock user data based on role
+    if (user.role === "manager") {
+      setUserName("Alice Smith");
+      setProject("Timesheet App");
+    } else {
+      setUserName("Vivek Bindra");
+      setProject("Database Optimization");
+    }
+    
     // Mock dates
     const today = new Date();
     const diff = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
@@ -25,13 +31,35 @@ const Dashboard = ({ user }) => {
     setToDate(calculateToDate(mondayFormatted));
     setMaxDate(mondayFormatted);
     setMinDate(calculateMinDate(mondayFormatted));
-  }, []);
+  }, [user.role]);
+  
 
   useEffect(() => {
     const generateTimesheetTemplate = () => {
       const handleSubmit = (e) => {
         e.preventDefault();
-        alert("Timesheet submitted");
+        let isValid = true;
+
+        // Clear existing validation warnings
+        document.querySelectorAll('.validation-warning').forEach(warning => warning.remove());
+
+        // Check if any work hours field is empty
+        document.querySelectorAll('input[name^="workHours_"]').forEach((input) => {
+          if (input.value === "") {
+            const day = input.name.split("_")[1];
+            const warning = document.createElement("span");
+            warning.className = "validation-warning";
+            warning.textContent = `Please enter the work hours for ${day}`;
+            input.parentNode.appendChild(warning);
+            isValid = false;
+          }
+        });
+
+        // If all fields are filled, proceed with submission
+        if (isValid) {
+          // Here you can add your logic to submit the timesheet
+          alert("Timesheet submitted");
+        }
       };
 
       const template = (

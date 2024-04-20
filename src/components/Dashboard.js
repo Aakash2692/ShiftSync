@@ -199,13 +199,12 @@ const Dashboard = ({ user }) => {
     document.querySelector(`input[name="${workHoursName}"]`).value = hours.toFixed(2);
   };
 
-  const handleSubmit = (e) => {
+ const handleSubmit = (e) => {
     if (e.nativeEvent.submitter && e.nativeEvent.submitter.tagName === "BUTTON" && e.nativeEvent.submitter.type === "submit") {
       e.preventDefault();
       alert("Timesheet submitted");
     }
   };
-
   const renderTimeOptions = () => {
     const options = [];
     for (let i = 9; i <= 18; i++) {

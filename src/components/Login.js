@@ -23,7 +23,7 @@ const Login = ({ setUser }) => {
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="employeeId">Employee ID: </label>
+          <label htmlFor="employeeId" aria-required>Employee ID: </label>
           <input
             type="text"
             id="employeeId"

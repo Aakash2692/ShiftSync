@@ -17,8 +17,8 @@ const Dashboard = ({ user }) => {
         setUserName(userResponse.data.name);
       } catch (error) {
         console.error("Error fetching user data:", error);
-      } 
-    };  
+      }
+    };
 
     fetchData();
   }, [user.id]);
@@ -45,10 +45,30 @@ const Dashboard = ({ user }) => {
     const generateTimesheetTemplate = () => {
       const handleSubmit = (e) => {
         e.preventDefault();
-        // Handle form submission logic here
-        alert("Timesheet submitted");
+        let isValid = true;
+
+        // Clear existing validation warnings
+        document.querySelectorAll('.validation-warning').forEach(warning => warning.remove());
+
+        // Check if any work hours field is empty
+        document.querySelectorAll('input[name^="workHours_"]').forEach((input) => {
+          if (input.value === "") {
+            const day = input.name.split("_")[1];
+            const warning = document.createElement("span");
+            warning.className = "validation-warning";
+            warning.textContent = `Please enter the work hours for ${day}`;
+            input.parentNode.appendChild(warning);
+            isValid = false;
+          }
+        });
+
+        // If all fields are filled, proceed with submission
+        if (isValid) {
+          // Here you can add your logic to submit the timesheet
+          alert("Timesheet submitted");
+        }
       };
-    
+
       const template = (
         <form className="timesheet-container" onSubmit={handleSubmit}>
           <h3>Timesheet Template</h3>
@@ -130,7 +150,7 @@ const Dashboard = ({ user }) => {
       );
       setTimesheetTemplate(template);
     };
-    
+
     generateTimesheetTemplate();
   }, [fromDate, minDate, maxDate]);
 
@@ -181,15 +201,6 @@ const Dashboard = ({ user }) => {
     let hours = end - start;
     if (hours < 0) hours += 24;
     document.querySelector(`input[name="${workHoursName}"]`).value = hours.toFixed(2);
-  };
-
-  const handleSubmit = (e) => {
-    // Check if the submit event was triggered by clicking the submit button
-    if (e.nativeEvent.submitter && e.nativeEvent.submitter.tagName === "BUTTON" && e.nativeEvent.submitter.type === "submit") {
-      // Show the alert only when the submit button is clicked
-      e.preventDefault(); // Prevent the form from submitting
-      alert("Timesheet submitted");
-    }
   };
 
   const renderTimeOptions = () => {

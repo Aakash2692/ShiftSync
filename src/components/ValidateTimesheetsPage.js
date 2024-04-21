@@ -1,23 +1,19 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../components/css/ValidateTimesheetsPage.css";
 
-const ValidateTimesheetsPage = () => {
+const ValidateTimesheetsPage = ({ user }) => {
   const navigate = useNavigate();
 
-  const [pastTimesheets, setPastTimesheets] = useState([
-    { id: 1, employee: "John Doe", employeeId: "EMP001", project: "Backend API Development", fromDate: "2024-04-11", toDate: "2024-04-15", status: "Pending", hours: 42, rejectionReason: "" },
-    { id: 2, employee: "Jane Smith", employeeId: "EMP002", project: "Frontend UI Design", fromDate: "2024-04-04", toDate: "2024-04-08", status: "Approved", hours: 44, rejectionReason: "" },
-    { id: 3, employee: "Michael Johnson", employeeId: "EMP003", project: "Database Optimization", fromDate: "2024-03-28", toDate: "2024-04-01", status: "Rejected", hours: 40, rejectionReason: "Incomplete timesheet" },
-    // Add more timesheet data here
-  ]);
+  const [pastTimesheets, setPastTimesheets] = useState([]);
+  const [selectedTimesheet, setSelectedTimesheet] = useState(null);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
 
-  const [rejectComment, setRejectComment] = useState(""); // State for reject comment
-  const [activeRejectId, setActiveRejectId] = useState(null); // State for active reject id
-
-  const handleGoBack = () => {
-    navigate("/"); // Redirect to the dashboard page
-  };
+  useEffect(() => {
+    const storedTimesheets = JSON.parse(localStorage.getItem("timesheets")) || [];
+    setPastTimesheets(storedTimesheets);
+  }, []);
 
   const handleApprove = (id) => {
     const updatedTimesheets = pastTimesheets.map((timesheet) => {
@@ -27,35 +23,47 @@ const ValidateTimesheetsPage = () => {
       return timesheet;
     });
     setPastTimesheets(updatedTimesheets);
+    localStorage.setItem("timesheets", JSON.stringify(updatedTimesheets));
   };
 
   const handleReject = (id) => {
-    // Set the active reject id
-    setActiveRejectId(id);
-    // Clear the comment when another row is rejected
-    setRejectComment("");
+    const timesheetToReject = pastTimesheets.find((timesheet) => timesheet.id === id);
+    setSelectedTimesheet(timesheetToReject);
+    setShowRejectModal(true);
   };
 
-  const handleConfirmReject = () => {
-    if (!rejectComment.trim()) {
-      alert("Please provide a reason for rejection.");
-      return;
-    }
-
+  const handleRejectConfirm = () => {
     const updatedTimesheets = pastTimesheets.map((timesheet) => {
-      if (timesheet.id === activeRejectId) {
-        return { ...timesheet, status: "Rejected", rejectionReason: rejectComment.trim() };
+      if (timesheet.id === selectedTimesheet.id) {
+        return { ...timesheet, status: "Rejected", rejectionReason: rejectionReason };
       }
       return timesheet;
     });
     setPastTimesheets(updatedTimesheets);
-    setRejectComment("");
-    setActiveRejectId(null); // Reset active reject id
+    localStorage.setItem("timesheets", JSON.stringify(updatedTimesheets));
+    setShowRejectModal(false);
+    setRejectionReason("");
+  };
+
+  const handleRejectCancel = () => {
+    setShowRejectModal(false);
+    setRejectionReason("");
+  };
+
+  const handleClearRecords = () => {
+    // Clear all past timesheets
+    setPastTimesheets([]);
+    localStorage.removeItem("timesheets");
   };
 
   return (
     <div className="timesheets-container">
       <h2>Validate Timesheets</h2>
+      <div className="button-container">
+        <button className="clear-button" onClick={handleClearRecords}>
+          Clear Records
+        </button>
+      </div>
       <table>
         <thead>
           <tr>
@@ -83,19 +91,12 @@ const ValidateTimesheetsPage = () => {
               <td>
                 {timesheet.status === "Pending" && (
                   <>
-                    <button className="approve-button" onClick={() => handleApprove(timesheet.id)}>Approve</button>
-                    <button className="reject-button" onClick={() => handleReject(timesheet.id)}>Reject</button>
-                    {activeRejectId === timesheet.id && (
-                      <div className="reject-comment">
-                        <textarea
-                          rows="2"
-                          placeholder="Enter reason for rejection..."
-                          value={rejectComment}
-                          onChange={(e) => setRejectComment(e.target.value)}
-                        ></textarea>
-                        <button className="confirm-reject" onClick={handleConfirmReject}>Confirm Reject</button>
-                      </div>
-                    )}
+                    <button className="approve-button" onClick={() => handleApprove(timesheet.id)}>
+                      Approve
+                    </button>
+                    <button className="reject-button" onClick={() => handleReject(timesheet.id)}>
+                      Reject
+                    </button>
                   </>
                 )}
               </td>
@@ -109,8 +110,30 @@ const ValidateTimesheetsPage = () => {
         </tbody>
       </table>
       <div className="button-container">
-        <button className="go-back-button" onClick={handleGoBack}>Go Back to Dashboard</button>
+        <button className="go-back-button" onClick={() => navigate("/")}>
+          Go Back to Dashboard
+        </button>
       </div>
+
+      {/* Rejection Modal */}
+      {showRejectModal && (
+        <div className="reject-modal">
+          <div className="modal-content">
+            <span className="close" onClick={handleRejectCancel}>&times;</span>
+            <h2>Reject Timesheet</h2>
+            <p>Please provide a reason for rejecting this timesheet:</p>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Enter rejection reason..."
+            ></textarea>
+            <div className="button-container">
+              <button onClick={handleRejectCancel}>Cancel</button>
+              <button onClick={handleRejectConfirm}>Confirm Reject</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

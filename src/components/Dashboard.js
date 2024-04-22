@@ -11,6 +11,13 @@ const Dashboard = ({ user }) => {
   const [timesheetTemplate, setTimesheetTemplate] = useState(null);
   const [maxDate, setMaxDate] = useState("");
   const [minDate, setMinDate] = useState("");
+  const [pastTimesheets, setPastTimesheets] = useState([]);
+  const [filteredTimesheets, setFilteredTimesheets] = useState([]);
+  
+  // State for rejection modal
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [selectedTimesheet, setSelectedTimesheet] = useState(null);
 
   useEffect(() => {
     // Mock user data based on role
@@ -21,7 +28,7 @@ const Dashboard = ({ user }) => {
       setUserName("Vivek Bindra");
       setProject("Database Optimization");
     }
-    
+
     // Mock dates
     const today = new Date();
     const diff = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
@@ -31,56 +38,43 @@ const Dashboard = ({ user }) => {
     setToDate(calculateToDate(mondayFormatted));
     setMaxDate(mondayFormatted);
     setMinDate(calculateMinDate(mondayFormatted));
+
+    // Load past timesheets from localStorage
+    const storedTimesheets = JSON.parse(localStorage.getItem("timesheets")) || [];
+    setPastTimesheets(storedTimesheets);
+
+    // Set initial filtered timesheets for the current week
+    const initialFilteredTimesheets = filterTimesheetsByWeek(storedTimesheets, mondayFormatted, calculateToDate(mondayFormatted));
+    setFilteredTimesheets(initialFilteredTimesheets);
   }, [user.role]);
-  
 
   useEffect(() => {
     const generateTimesheetTemplate = () => {
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        let isValid = true;
-
-        // Clear existing validation warnings
-        document.querySelectorAll('.validation-warning').forEach(warning => warning.remove());
-
-        // Check if any work hours field is empty
-        document.querySelectorAll('input[name^="workHours_"]').forEach((input) => {
-          if (input.value === "") {
-            const day = input.name.split("_")[1];
-            const warning = document.createElement("span");
-            warning.className = "validation-warning";
-            warning.textContent = `Please enter the work hours for ${day}`;
-            input.parentNode.appendChild(warning);
-            isValid = false;
-          }
-        });
-
-        // If all fields are filled, proceed with submission
-        if (isValid) {
-          // Here you can add your logic to submit the timesheet
-          alert("Timesheet submitted");
-        }
-      };
-
       const template = (
         <form className="timesheet-container" onSubmit={handleSubmit}>
           <h3>Timesheet Template</h3>
           {/* Add Employee Name and Project Details */}
           <div className="employee-details">
             <label>Employee Name:</label>
-            <span>{userName}</span><br></br>
+            <span>{userName}</span><br />
             {/* Add Project */}
             <label>Project:</label>
-            <span>{project}</span><br></br>
+            <span>{project}</span><br />
             {/* Add Status */}
             <label>Status:</label>
-            <span>Pending</span>
+            <span>{getUserTimesheetStatus()}</span>
+            {selectedTimesheet && selectedTimesheet.status === "Rejected" && (
+              <div className="rejection-reason-display">
+                <p>Rejection Reason:</p>
+                <p>{selectedTimesheet.rejectionReason}</p>
+              </div>
+            )}
           </div>
           {/* From Date */}
           <label>From Date:</label>
           <div className="date-input">
             <button onClick={handlePrevWeek} disabled={fromDate === minDate}>&lt;</button>
-            <input type="date" value={fromDate} onChange={handleFromDateChange} min={minDate} max={maxDate} readOnly/>
+            <input type="date" value={fromDate} onChange={handleFromDateChange} min={minDate} max={maxDate} readOnly />
             <button onClick={handleNextWeek} disabled={fromDate === maxDate}>&gt;</button>
           </div>
           {/* To Date */}
@@ -148,11 +142,12 @@ const Dashboard = ({ user }) => {
     };
 
     generateTimesheetTemplate();
-  }, [fromDate, minDate, maxDate, userName, project]);
+  }, [fromDate, minDate, maxDate, userName, project, selectedTimesheet]);
 
   const handleFromDateChange = (e) => {
     setFromDate(e.target.value);
     setToDate(calculateToDate(e.target.value));
+    updateFilteredTimesheets(e.target.value, calculateToDate(e.target.value));
   };
 
   const handlePrevWeek = (e) => {
@@ -161,6 +156,7 @@ const Dashboard = ({ user }) => {
     const prevWeekDate = prevWeek.toISOString().split('T')[0];
     setFromDate(prevWeekDate);
     setToDate(calculateToDate(prevWeekDate));
+    updateFilteredTimesheets(prevWeekDate, calculateToDate(prevWeekDate));
   };
 
   const handleNextWeek = (e) => {
@@ -171,7 +167,16 @@ const Dashboard = ({ user }) => {
       const nextWeekDate = nextWeek.toISOString().split('T')[0];
       setFromDate(nextWeekDate);
       setToDate(calculateToDate(nextWeekDate));
+      updateFilteredTimesheets(nextWeekDate, calculateToDate(nextWeekDate));
     }
+  };
+
+  const updateFilteredTimesheets = (startDate, endDate) => {
+    setFilteredTimesheets(filterTimesheetsByWeek(pastTimesheets, startDate, endDate));
+  };
+
+  const filterTimesheetsByWeek = (timesheets, startDate, endDate) => {
+    return timesheets.filter((timesheet) => timesheet.fromDate >= startDate && timesheet.toDate <= endDate);
   };
 
   const calculateToDate = (fromDate) => {
@@ -199,11 +204,63 @@ const Dashboard = ({ user }) => {
     document.querySelector(`input[name="${workHoursName}"]`).value = hours.toFixed(2);
   };
 
- const handleSubmit = (e) => {
-    if (e.nativeEvent.submitter && e.nativeEvent.submitter.tagName === "BUTTON" && e.nativeEvent.submitter.type === "submit") {
-      e.preventDefault();
-      alert("Timesheet submitted");
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const storedTimesheets = JSON.parse(localStorage.getItem("timesheets")) || [];
+  
+    const weekAlreadySubmittedIndex = storedTimesheets.findIndex((timesheet) => {
+      return timesheet.employeeId === user.employeeId
+        && timesheet.fromDate === fromDate
+        && timesheet.toDate === toDate;
+    });
+  
+    if (weekAlreadySubmittedIndex !== -1) {
+      // Update existing timesheet
+      storedTimesheets[weekAlreadySubmittedIndex].status = "Pending"; // Reset status if resubmitting
+      storedTimesheets[weekAlreadySubmittedIndex].hours = calculateTotalHours();
+      storedTimesheets[weekAlreadySubmittedIndex].rejectionReason = ""; // Reset rejection reason if resubmitting
+    } else {
+      // Create a new timesheet object
+      const newTimesheet = {
+        id: storedTimesheets.length + 1,
+        employee: userName,
+        employeeId: user.employeeId,
+        project: project,
+        fromDate: fromDate,
+        toDate: toDate,
+        status: "Pending",
+        hours: calculateTotalHours(),
+        rejectionReason: "",
+      };
+      storedTimesheets.push(newTimesheet);
+
     }
+  
+    localStorage.setItem("timesheets", JSON.stringify(storedTimesheets));
+    setPastTimesheets(storedTimesheets);
+    setFilteredTimesheets(storedTimesheets);
+    
+    alert("Timesheet submitted successfully.");
+    resetWorkHours();
+  };
+  
+  const calculateTotalHours = () => {
+    // Calculate total hours worked for the week
+    let totalHours = 0;
+    [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ].forEach((day) => {
+      const workHours = parseFloat(document.querySelector(`input[name="workHours_${day}"]`).value) || 0;
+      totalHours += workHours;
+    });
+    return totalHours.toFixed(2);
   };
   const renderTimeOptions = () => {
     const options = [];
@@ -221,9 +278,61 @@ const Dashboard = ({ user }) => {
     window.location.href = "/";
   };
 
-
   const handleValidateTimesheets = () => {
     navigate("/validate-timesheets");
+  };
+
+  const getUserTimesheetStatus = () => {
+    const currentWeekTimesheets = filteredTimesheets.filter((timesheet) => {
+      return timesheet.employeeId === user.employeeId
+        && timesheet.fromDate === fromDate
+        && timesheet.toDate === toDate;
+    });
+  
+    if (currentWeekTimesheets.length === 0) {
+      return "Not Submitted";
+    } else {
+      const status = currentWeekTimesheets[0].status;
+      return status;
+    }
+  };
+  
+
+  const resetWorkHours = () => {
+    [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday",
+    ].forEach((day) => {
+      document.querySelector(`input[name="workHours_${day}"]`).value = "";
+    });
+  };
+
+  const handleReject = () => {
+    if (!selectedTimesheet) return;
+    setShowRejectModal(true);
+  };
+
+  const handleRejectConfirm = () => {
+    const updatedTimesheets = pastTimesheets.map((timesheet) => {
+      if (timesheet.id === selectedTimesheet.id) {
+        return { ...timesheet, status: "Rejected", rejectionReason: rejectionReason };
+      }
+      return timesheet;
+    });
+    setPastTimesheets(updatedTimesheets);
+    localStorage.setItem("timesheets", JSON.stringify(updatedTimesheets));
+    setShowRejectModal(false);
+    setRejectionReason("");
+  };
+
+  const handleRejectCancel = () => {
+    setShowRejectModal(false);
+    setRejectionReason("");
   };
 
   return (
@@ -239,6 +348,26 @@ const Dashboard = ({ user }) => {
         Welcome, {userName} ({user.role})
       </h3>
       {timesheetTemplate}
+
+      {/* Rejection Modal */}
+      {showRejectModal && (
+        <div className="reject-modal">
+          <div className="modal-content">
+            <span className="close" onClick={handleRejectCancel}>&times;</span>
+            <h2>Reject Timesheet</h2>
+            <p>Please provide a reason for rejecting this timesheet:</p>
+            <textarea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              placeholder="Enter rejection reason..."
+            ></textarea>
+            <div className="button-container">
+              <button onClick={handleRejectCancel}>Cancel</button>
+              <button onClick={handleRejectConfirm}>Confirm Reject</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

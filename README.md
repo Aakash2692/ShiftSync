@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ShiftSync : An employee time-entry management system
 A system where employees can log in and create their timesheets for entire week and then submit it to manager. 
 Manager can log in and see all the timesheets submitted by employees and then he can validate the timesheets.
@@ -73,3 +74,6 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+=======
+# Timesheet-Management-App
+>>>>>>> 125a692e56f93810277440c67cfcaa61fea91be6

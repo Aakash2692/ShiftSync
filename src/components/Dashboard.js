@@ -204,6 +204,7 @@ const Dashboard = ({ user }) => {
     document.querySelector(`input[name="${workHoursName}"]`).value = hours.toFixed(2);
   };
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const storedTimesheets = JSON.parse(localStorage.getItem("timesheets")) || [];
@@ -233,6 +234,7 @@ const Dashboard = ({ user }) => {
         rejectionReason: "",
       };
       storedTimesheets.push(newTimesheet);
+
     }
   
     localStorage.setItem("timesheets", JSON.stringify(storedTimesheets));
@@ -260,7 +262,6 @@ const Dashboard = ({ user }) => {
     });
     return totalHours.toFixed(2);
   };
-
   const renderTimeOptions = () => {
     const options = [];
     for (let i = 9; i <= 18; i++) {
